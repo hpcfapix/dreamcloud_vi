@@ -1,0 +1,39 @@
+extends layout
+
+block navbar
+    #navbar.navbar-collapse
+        ul.nav.navbar-nav
+            li
+                a(href='/') Experiments
+            li
+                a(href='/about') About
+            li.active
+                a(href='/contact') Contact
+        ul.nav.navbar-nav.navbar-right
+            li
+                a(href="http://www.hlrs.de" style="padding-top: 0px; padding-bottom: 0px")
+                    img(src="/img/corporate/USTUTT.jpg" style="margin-top: 0px")
+
+block content
+    .container
+        .row
+            .col-xs-6
+                The ATOM monitoring framework is subject to research and development at the Service Management & Business Processes Group at the High Performance Computing Center (HLRS) Stuttgart.
+                p
+                b Contact:
+                br
+                | Michael Gienger
+                br
+                a(href="https://www.hlrs.de/organization/av/sane/") Head of Service Management & Business Processes
+                br
+                | Nobelstraße 19
+                br
+                | 70569 Stuttgart
+                br
+                | Germany
+                p
+                | Email: gienger[at]hlrs.de
+                br
+                | Phone: ++49(0)711 / 685-63824
+                br
+                | Fax: ++49(0)711 / 685-65832

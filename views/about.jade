@@ -1,0 +1,47 @@
+extends layout
+
+block navbar
+    #navbar.navbar-collapse
+        ul.nav.navbar-nav
+            li
+                a(href='/') Experiments
+            li.active
+                a(href='/about') About
+            li
+                a(href='/contact') Contact
+        ul.nav.navbar-nav.navbar-right
+            li
+                a(href="http://www.hlrs.de" style="padding-top: 0px; padding-bottom: 0px")
+                    img(src="/img/corporate/USTUTT.jpg" style="margin-top: 0px")
+
+block content
+    .container
+        .row
+            .col-xs-10
+                h3(style="margin-top: -20px;") Execution Models For Energy-Efficient Computing Systems
+                | Information and Communication Technologies (ICT) play an important role in increasing the energy efficiency in the economy and contributing to sustainable growth in Europe. The EXCESS project addresses the important challenge of energy efficiency on HPC and embedded platforms. EXCESS aims at providing radically new energy-aware execution models forming foundations for energy-efficient computing paradigms that will enable two orders of magnitude improvements in energy efficiency for computing systems. EXCESS takes a holistic approach and introduces novel programming methodologies to drastically simplify the development of energy-aware applications. These applications will be energy-portable in a wide range of computing systems while preserving relevant aspects of performance. The expertise in energy efficiency of all the partners involved in the EXCESS project is key to ensure that EXCESS has a sustainable impact on the state of the art in eco-efficiency and that its results can be effectively exploited.
+
+                p
+                | For more information, please visit our project&nbsp;
+                a(href="http://www.excess-project.eu/") page
+                | .
+                br
+                br
+                h3 EXCESS Partners
+                br
+                .row
+                    .col-xs-2.text-center
+                        a(href="http://www.chalmers.se/")
+                            img(src="/img/corporate/CHALMERS.jpg")
+                    .col-xs-2.text-center
+                        a(href="http://www.liu.se/?l=en")
+                            img(src="/img/corporate/LIU.jpg")
+                    .col-xs-2.text-center
+                        a(href="http://www.movidius.com/")
+                            img(src="/img/corporate/MOVIDIUS.jpg")
+                    .col-xs-2.text-center
+                        a(href="http://en.uit.no")
+                            img(src="/img/corporate/UiT.jpg")
+                    .col-xs-2.text-center
+                        a(href="http://www.hlrs.se/")
+                            img(src="/img/corporate/USTUTT.jpg")

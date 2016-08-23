@@ -1,0 +1,30 @@
+extends layout
+
+append head
+    link(href='https://cdnjs.cloudflare.com/ajax/libs/ng-table/0.3.3/ng-table.min.css', rel='stylesheet')
+    link(href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css')
+    link(href='/css/rickshaw/detail.css', rel='stylesheet')
+    link(href='/css/rickshaw/graph.css', rel='stylesheet')
+    link(href='/css/rickshaw/legend.css', rel='stylesheet')
+    link(href='/css/rickshaw/extensions.css?v=2', rel='stylesheet')
+
+block content
+    .container(ng-app="main" ng-controller="TableCtrl")
+        div(role="tabpanel" style="margin-top: -20px")
+            ul#experimentTab.nav.nav-tabs(role="tablist")
+                li.active(role="presentation")
+                    a(href="#experiments", aria-controls="experiments" role="tab" data-toggle="tab")
+                        b Experiments
+
+            .tab-content(style="margin-top: 30px;")
+                #experiments.tab-pane.active(role="tabpanel")
+                    include experiments
+
+        .push
+    // /.container
+
+append scripts
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/ng-table/0.3.3/ng-table.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment-with-locales.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular-resource.min.js')
+    script(src='/js/mf-table.js')

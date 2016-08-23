@@ -1,0 +1,50 @@
+html, body {
+    height: 100%;
+}
+
+.action-icon {
+    float: left;
+    height: 32px;
+}
+
+.container {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -65px;
+}
+
+.push {
+    height: 65px;
+    background-color: #ffffff;
+}
+
+.footer {
+    height: 65px;
+    background-color: #f5f5f5;
+}
+
+.ng-table-counts {
+    margin-top: 20px;
+}
+
+img {
+    cursor: pointer;
+}
+
+td {
+    word-wrap: break-word;
+}
+
+body > .container {
+    padding: 120px 15px 0;
+}
+
+.container .text-muted {
+    margin: 20px 0;
+}
+
+.footer > .container {
+    padding-right: 15px;
+    padding-left: 15px;
+}

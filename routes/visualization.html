@@ -1,0 +1,426 @@
+<!--
+    Copyright (C) 2014-2015 University of Stuttgart
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<html>
+
+<head>
+    <!-- import required stylesheets from external components -->
+    <link type="text/css" rel="stylesheet" href="/css/rickshaw/graph.css">
+    <link type="text/css" rel="stylesheet" href="/css/rickshaw/detail.css">
+    <link type="text/css" rel="stylesheet" href="/css/rickshaw/legend.css">
+    <link type="text/css" rel="stylesheet" href="/css/rickshaw/extensions.css?v=2">
+    <link type="text/css" rel="stylesheet" href="/css/switch-button/switch-button.css">
+    <link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css">
+    <link type="text/css" rel="stylesheet" href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css'>
+    <link type="text/css" rel="stylesheet" href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css'>
+    <!-- import javascripts from external components -->
+    <script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js'></script>
+    <script type='text/javascript' src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.15/jquery-ui.min.js"></script>
+    <!-- D3 and Rickshaw includes for visualization -->
+    <script src="/js/d3/d3.v3.js"></script>
+    <script src="/js/rickshaw/Rickshaw.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Class.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Compat.ClassList.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Renderer.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Renderer.Area.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Renderer.Line.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Renderer.Bar.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Renderer.ScatterPlot.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Renderer.Stack.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.RangeSlider.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.RangeSlider.Preview.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.HoverDetail.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Annotate.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Legend.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Axis.Time.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Behavior.Series.Toggle.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Behavior.Series.Order.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Behavior.Series.Highlight.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Smoother.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Fixtures.Time.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Fixtures.Time.Local.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Fixtures.Number.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Fixtures.RandomData.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Fixtures.Color.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Color.Palette.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Axis.X.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Axis.Y.js"></script>
+    <script src="/js/rickshaw/Rickshaw.Graph.Axis.Y.Scaled.js"></script>
+    <!-- spinning wheel shown while loading a visualiation -->
+    <script src="/js/spinner/spin.min.js"></script>
+    <script src="/js/switch-button/switch-button.js"></script>
+    <!-- own javascript import handling the visualiation stuff-->
+    <script src="/js/mf-infoviz.js"></script>
+    <script src="/js/mf-rendercontrols.js"></script>
+</head>
+
+<body style="cursor: auto;">
+    <div id="content" style="margin-top: 30px;">
+        <!-- side panel -->
+        <form id="side_panel">
+            <!-- legend -->
+            <section style="padding-left: 820px; padding-top: 0px;">
+                <b style="color: #000000; font-size: 16px;">Metrics</b>
+                <div id="legend" class="rickshaw_legend" style="height: 123px; margin-top: 12px;"></div>
+            </section>
+            <!-- different kinds of chart types as selection menu -->
+            <section style="margin-top: -190px; width: 100px;">
+                <b style="color: #000000; font-size: 16px;">Types</b>
+                <div id="renderer_form" class="toggler" style="margin-top: 12px">
+                    <input type="radio" name="renderer" id="area" value="area">
+                    <label for="area">area</label>
+                    <input type="radio" name="renderer" id="bar" value="bar">
+                    <label for="bar">bar</label>
+                    <input type="radio" name="renderer" id="line" value="line" checked="">
+                    <label for="line">line</label>
+                    <input type="radio" name="renderer" id="scatter" value="scatterplot">
+                    <label for="scatter">scatter</label>
+                </div>
+            </section>
+            <!-- interpolation stuff -->
+            <b style="color: #000000; font-size: 16px;">Interpolation</b>
+            <section>
+                <div id="offset_form" style="display:none">
+                    <label for="value">
+                        <input type="radio" name="offset" id="value" value="value" checked="">
+                    </label>
+                </div>
+                <div id="interpolation_form">
+                    <label for="cardinal">
+                        <input type="radio" name="interpolation" id="cardinal" value="cardinal" checked="">
+                    </label>
+                    <label for="linear">
+                        <input type="radio" name="interpolation" id="linear" value="linear">
+                    </label>
+                    <label for="step">
+                        <input type="radio" name="interpolation" id="step" value="step-after">
+                    </label>
+                </div>
+            </section>
+            <!-- smoothing the metric data -->
+            <b style="color: #000000; font-size: 16px;">Smoothing</b>
+            <section>
+                <div id="smoother" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all" style="width: 60px">
+                    <a class="ui-slider-handle ui-state-default ui-corner-all" href="#" style="left: 0%;"></a>
+                </div>
+            </section>
+            <!-- radio button for turning on/off live monitoring -->
+            <b style="color: #000000; font-size: 16px;">Live Monitoring</b>
+            <section>
+            <div class= "radio">
+                <label><input type="radio" name="Live" id="liveOn" >On</label>
+                <label><input type="radio" name="Live" id="liveOff" checked="">Off</label>
+            </div>
+            </section>
+            <!-- radio button for turning on/off Y-Logarithm-->
+            <b style="color: #000000; font-size: 16px;">Y Log-scale</b>
+            <section>
+            <div class= "radio">
+                <label><input type="radio" name="YLog" id="Y-LogOn">On</label>
+                <label><input type="radio" name="YLog" id="Y-LogOff" checked="">Off</label>
+            </div>
+            </section>
+        </form>
+        <!-- defining the layout of the graph -->
+        <div id="chart_container" style="padding-top: 60px; margin-left: -70px;">
+            <div id="y_axis"></div>
+            <div id="x_axis"></div>
+            <div id="chart"></div>
+            <div id="timeline"></div>
+            <div id="preview"></div>
+            <!-- extra drop-down menu to select a specific host for visualization -->
+            <div style="margin-top: 41px;">
+                <b>Host Selection</b>
+                <select id="hostnamesFilter" name="filter" class="form-control" onchange="new_query()">
+                    <option value="All Hosts">All Hosts</option>
+                </select>
+                </br>
+            </div>
+
+    <!-- start of local scripts to be executed on this specific page -->
+    <script>
+    /*
+     * request can be specific to IDs, metrics, and can hold an option for live monitoring
+     */
+    var user = getUrlParameter("user");
+    var task = getUrlParameter("task");
+    var executionID = getUrlParameter("id");
+    var metrics = getUrlParameter("metrics");
+    var isLive = getUrlParameter("live");
+    var YLog = undefined;
+
+    var seriesData;
+    var x_mapper = {};
+    var y_mapper = {};
+
+    var palette = new Rickshaw.Color.Palette({
+            scheme: 'classic9'
+    });
+
+    function clean_graph() {
+        $("#y_axis").empty();
+        $("#x_axis").empty();
+        $("#chart").empty();
+        $("#timeline").empty();
+        $("#legend").empty();
+    }
+
+    function getUrlParameter(sParam) {
+        var sPageURL = window.location.search.substring(1);
+        var sURLVariables = sPageURL.split(/[&\?]/);
+        for (var i = 0; i < sURLVariables.length; i++) {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == sParam) {
+                return sParameterName[1];
+            }
+        }
+    }
+
+    function data_request(url, IfVisualize) {
+        $.ajax({
+                    type: 'GET',
+                    url: url,
+                    async: true,
+                    success: function(data) {
+                        seriesData = data;
+                        $(seriesData).each(function(i) {
+                            seriesData[i].color = palette.color();
+                            var len = seriesData[i].data.length;
+                            var tmp = seriesData[i].data[0].x;
+                            for (var ii = 0; ii < len; ii++) {
+                                var previous_x = seriesData[i].data[ii].x;
+                                seriesData[i].data[ii].x = seriesData[i].data[ii].x - tmp;
+                                x_mapper[seriesData[i].data[ii].x] = previous_x;
+                            }
+                            if(YLog != undefined) {
+                                for (var ii = 0; ii < len; ii++) {
+                                    var previous_y = seriesData[i].data[ii].y;
+                                    seriesData[i].data[ii].y = Math.log10(seriesData[i].data[ii].y);
+                                    y_mapper[seriesData[i].data[ii].y] = previous_y;
+                                }
+                            }
+                        });
+                    },
+                    beforeSend: function() {
+                        if(IfVisualize) {
+                            var spinner = new Spinner().spin();
+                            var body = document.getElementsByTagName('body')[0];
+                            body.appendChild(spinner.el);    
+                        }
+                    },
+                    complete: function() {
+                        if(IfVisualize) {
+                            visualize(url);    
+                            var body = document.getElementsByTagName('body')[0];
+                            var spinner = body.childNodes[body.childNodes.length - 1];
+                            body.removeChild(spinner);
+                        }                
+                    }
+                });
+    }
+    /*
+     * will be executed while page is loading
+     */
+    $(document).ready(function() {
+        $('#scatter').hide();
+
+        /*
+         * if live monitoring is selected, then reload the page
+         */
+        $('#liveOn').click(function() {
+            isLive = 2;
+            new_query(data_request);
+        });
+        /*
+         * when live monitoring is disabled, then go back to the static page
+         */
+        $('#liveOff').click(function() {
+            isLive = undefined;
+            new_query(data_request);
+        });
+
+        /*
+         * if Y-Log is selected, then reload the page
+         */
+        $('#Y-LogOn').click(function() {
+            YLog = "on";
+            new_query(data_request);
+        });
+        /*
+         * if Y-Log is disabled, then reload the page
+         */
+        $('#Y-LogOff').click(function() {
+            YLog = undefined;
+            new_query(data_request);
+        });
+
+        /*
+         * get hostnames to fill the drop-down menu
+         */
+        /*var Response, original_request;
+        $.ajax({
+            type: 'GET',
+            url: "/runtime/" + user + '/' + task + '/' + executionID,
+            success: function(response) {
+                Response = response;
+                original_request = '/' + user + '/' + task + '/' + executionID + '?hostname=' + 'All Hosts';
+            },
+            complete: function() {
+                data_request(original_request, 1);
+                $(HostNames).each(function(i) {
+                    $('<option value="' + HostNames[i] + '">' + HostNames[i] + '</option>').appendTo('#hostnamesFilter');
+                    $("#hostnamesFilter").show();
+                });
+            }
+        });*/
+        original_request = '/' + user + '/' + executionID + '?hostname=' + 'All Hosts';
+        data_request(original_request, 1);
+    });
+
+    function new_query(callback) {
+         var option = document.getElementById("hostnamesFilter").value;
+         var request = '/mf/w3/visualization/' + user + '/' + task + '/' + executionID +  '?hostname=' + option;
+
+        if(isLive != undefined || YLog != undefined) {
+            if(isLive !=undefined) {
+                request += "&live" + isLive;    
+            }
+            $legendItems = $("#legend").find("li[class='line']");
+            $legendItems.each(function(i) {
+                var legendText = $(this).find('.label').text();
+                request += "&metrics=" + legendText;
+            });
+        }
+        clean_graph();
+        callback(request, 1);
+    }
+
+    /*
+     * visualize with Rickshaw
+     */
+    function visualize(url) {
+        var graph = new Rickshaw.Graph({
+            element: document.getElementById("chart"),
+            width: 600,
+            height: 333,
+            renderer: 'line',
+            stack: false,
+            stroke: true,
+            preserve: true,
+            series: seriesData,
+        });
+
+        var preview = new Rickshaw.Graph.RangeSlider({
+            graph: graph,
+            element: document.getElementById('preview'),
+        });
+
+        /*
+         * on hover, show the timestamp when the value was actually sampled
+         */
+        var hoverDetail = new Rickshaw.Graph.HoverDetail({
+            graph: graph,
+            xFormatter: function(x) {
+                var detail = x_mapper[x];
+                return new Date(detail * 1000).toString();
+            },
+            yFormatter: function(y) {
+                var detail;
+                if(YLog != undefined) {
+                    detail = y_mapper[y];    
+                }
+                else {
+                    detail = y;
+                }
+                return detail;
+            }
+        });
+
+        var legend = new Rickshaw.Graph.Legend({
+            graph: graph,
+            element: document.getElementById('legend')
+        });
+
+        var shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
+            graph: graph,
+            legend: legend
+        });
+
+        var order = new Rickshaw.Graph.Behavior.Series.Order({
+            graph: graph,
+            legend: legend
+        });
+
+        var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
+            graph: graph,
+            legend: legend
+        });
+
+        var smoother = new Rickshaw.Graph.Smoother({
+            graph: graph,
+            element: document.querySelector('#smoother')
+        });
+
+        var ticksTreatment = 'glow';
+
+        var xAxis = new Rickshaw.Graph.Axis.X({
+            graph: graph,
+            orientation: 'bottom',
+            tickFormat: Rickshaw.Fixtures.Number.formatSeconds,
+            element: document.getElementById('x_axis'),
+        });
+
+        var yAxis = new Rickshaw.Graph.Axis.Y({
+            graph: graph,
+            orientation: 'left',
+            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+            ticksTreatment: ticksTreatment,
+            element: document.getElementById('y_axis'),
+        });
+
+        var controls = new RenderControls({
+            element: document.querySelector('form'),
+            graph: graph
+        });
+
+        /*
+         * update graph when live monitoring is active
+         * data will be fetched each second from the server
+         */
+        if (isLive != undefined) {
+            var interval = parseInt(isLive);
+            if (interval == undefined) {
+                interval = 1;
+            }
+            interval = interval * 1000;
+            var LiveInterval = setInterval(function() {
+                data_request(url, 0);
+                graph.render();
+                if(isLive == undefined) {
+                    clearInterval(LiveInterval);
+                }
+            }, interval);
+        }
+
+        xAxis.render();
+        yAxis.render();
+        graph.render();
+
+    }
+    </script>
+</body>
+
+</html>
