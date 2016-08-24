@@ -68,7 +68,7 @@
 </head>
 
 <body style="cursor: auto;">
-    <div id="content" style="margin-top: 30px;">
+    <div id="content" style=" margin-top: 70px; margin-left: 250px;">
         <!-- side panel -->
         <form id="side_panel">
             <!-- legend -->
@@ -125,14 +125,6 @@
                 <label><input type="radio" name="Live" id="liveOff" checked="">Off</label>
             </div>
             </section>
-            <!-- radio button for turning on/off Y-Logarithm-->
-            <b style="color: #000000; font-size: 16px;">Y Log-scale</b>
-            <section>
-            <div class= "radio">
-                <label><input type="radio" name="YLog" id="Y-LogOn">On</label>
-                <label><input type="radio" name="YLog" id="Y-LogOff" checked="">Off</label>
-            </div>
-            </section>
         </form>
         <!-- defining the layout of the graph -->
         <div id="chart_container" style="padding-top: 60px; margin-left: -70px;">
@@ -141,14 +133,6 @@
             <div id="chart"></div>
             <div id="timeline"></div>
             <div id="preview"></div>
-            <!-- extra drop-down menu to select a specific host for visualization -->
-            <div style="margin-top: 41px;">
-                <b>Host Selection</b>
-                <select id="hostnamesFilter" name="filter" class="form-control" onchange="new_query()">
-                    <option value="All Hosts">All Hosts</option>
-                </select>
-                </br>
-            </div>
 
     <!-- start of local scripts to be executed on this specific page -->
     <script>
@@ -159,13 +143,9 @@
     var task = getUrlParameter("task");
     var executionID = getUrlParameter("id");
     var metrics = getUrlParameter("metrics");
-    var isLive = getUrlParameter("live");
-    var YLog = undefined;
+    var interval = 1000; /* unit is milli-second */
     var annotators;
-
     var seriesData;
-    var x_mapper = {};
-    var y_mapper = {};
 
     var palette = new Rickshaw.Color.Palette({
             scheme: 'classic9'
@@ -192,46 +172,31 @@
 
     function data_request(url, IfVisualize) {
         $.ajax({
-                    type: 'GET',
-                    url: url,
-                    async: true,
-                    success: function(data) {
-                        seriesData = data;
-                        $(seriesData).each(function(i) {
-                            seriesData[i].color = palette.color();
-                            /*
-                            var len = seriesData[i].data.length;
-                            var tmp = seriesData[i].data[0].x;
-                            for (var ii = 0; ii < len; ii++) {
-                                var previous_x = seriesData[i].data[ii].x;
-                                seriesData[i].data[ii].x = seriesData[i].data[ii].x - tmp;
-                                x_mapper[seriesData[i].data[ii].x] = previous_x;
-                            }*/
-                            if(YLog != undefined) {
-                                for (var ii = 0; ii < len; ii++) {
-                                    var previous_y = seriesData[i].data[ii].y;
-                                    seriesData[i].data[ii].y = Math.log10(seriesData[i].data[ii].y);
-                                    y_mapper[seriesData[i].data[ii].y] = previous_y;
-                                }
-                            }
-                        });
-                    },
-                    beforeSend: function() {
-                        if(IfVisualize) {
-                            var spinner = new Spinner().spin();
-                            var body = document.getElementsByTagName('body')[0];
-                            body.appendChild(spinner.el);    
-                        }
-                    },
-                    complete: function() {
-                        if(IfVisualize) {
-                            visualize(url);    
-                            var body = document.getElementsByTagName('body')[0];
-                            var spinner = body.childNodes[body.childNodes.length - 1];
-                            body.removeChild(spinner);
-                        }                
-                    }
+            type: 'GET',
+            url: url,
+            async: true,
+            success: function(data) {
+                seriesData = data;
+                $(seriesData).each(function(i) {
+                    seriesData[i].color = palette.color();
                 });
+            },
+            beforeSend: function() {
+                if(IfVisualize) {
+                    var spinner = new Spinner().spin();
+                    var body = document.getElementsByTagName('body')[0];
+                    body.appendChild(spinner.el);    
+                }
+            },
+            complete: function() {
+                if(IfVisualize) {
+                    visualize(url);    
+                    var body = document.getElementsByTagName('body')[0];
+                    var spinner = body.childNodes[body.childNodes.length - 1];
+                    body.removeChild(spinner);
+                }                
+            }
+        });
     }
     /*
      * will be executed while page is loading
@@ -239,71 +204,18 @@
     $(document).ready(function() {
         $('#scatter').hide();
 
-        /*
-         * if live monitoring is selected, then reload the page
-         */
-        $('#liveOn').click(function() {
-            isLive = 2;
-            new_query(data_request);
-        });
-        /*
-         * when live monitoring is disabled, then go back to the static page
-         */
-        $('#liveOff').click(function() {
-            isLive = undefined;
-            new_query(data_request);
-        });
-
-        /*
-         * if Y-Log is selected, then reload the page
-         */
-        $('#Y-LogOn').click(function() {
-            YLog = "on";
-            new_query(data_request);
-        });
-        /*
-         * if Y-Log is disabled, then reload the page
-         */
-        $('#Y-LogOff').click(function() {
-            YLog = undefined;
-            new_query(data_request);
-        });
-
-        /*
-         * firstly, get annotations
-         * then, get data 
-         */
-        var original_request;
+        var request = '/' + user + '/' + executionID + '?hostname=' + 'All Hosts';
         $.ajax({
             type: 'GET',
             url: "/annotators/" + user + '/' + executionID,
             success: function(response) {
                 annotators = response;
-                original_request = '/' + user + '/' + executionID + '?hostname=' + 'All Hosts';
             },
             complete: function() {
-                data_request(original_request, 1);
+                data_request(request, 1);
             }
         });
     });
-
-    function new_query(callback) {
-         var option = document.getElementById("hostnamesFilter").value;
-         var request = '/mf/w3/visualization/' + user + '/' + task + '/' + executionID +  '?hostname=' + option;
-
-        if(isLive != undefined || YLog != undefined) {
-            if(isLive !=undefined) {
-                request += "&live" + isLive;    
-            }
-            $legendItems = $("#legend").find("li[class='line']");
-            $legendItems.each(function(i) {
-                var legendText = $(this).find('.label').text();
-                request += "&metrics=" + legendText;
-            });
-        }
-        clean_graph();
-        callback(request, 1);
-    }
 
     /*
      * visualize with Rickshaw
@@ -333,20 +245,6 @@
             xFormatter: function(x) {
                 return new Date(x * 1000).toString();
             }
-            /*xFormatter: function(x) {
-                var detail = x_mapper[x];
-                return new Date(detail * 1000).toString();
-            },
-            yFormatter: function(y) {
-                var detail;
-                if(YLog != undefined) {
-                    detail = y_mapper[y];    
-                }
-                else {
-                    detail = y;
-                }
-                return detail;
-            }*/
         });
 
         var annotator = new Rickshaw.Graph.Annotate({
@@ -413,20 +311,19 @@
          * update graph when live monitoring is active
          * data will be fetched each second from the server
          */
-        if (isLive != undefined) {
-            var interval = parseInt(isLive);
-            if (interval == undefined) {
-                interval = 1;
-            }
-            interval = interval * 1000;
+
+        $('#liveOn').click(function() {
             var LiveInterval = setInterval(function() {
                 data_request(url, 0);
+                console.log("live on");
                 graph.render();
-                if(isLive == undefined) {
+
+                if($('#liveOff').is(':checked')){
+                    console.log("live off");
                     clearInterval(LiveInterval);
                 }
             }, interval);
-        }
+        });
 
         xAxis.render();
         yAxis.render();
