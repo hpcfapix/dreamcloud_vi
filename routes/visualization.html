@@ -161,6 +161,7 @@
     var metrics = getUrlParameter("metrics");
     var isLive = getUrlParameter("live");
     var YLog = undefined;
+    var annotators;
 
     var seriesData;
     var x_mapper = {};
@@ -198,13 +199,14 @@
                         seriesData = data;
                         $(seriesData).each(function(i) {
                             seriesData[i].color = palette.color();
+                            /*
                             var len = seriesData[i].data.length;
                             var tmp = seriesData[i].data[0].x;
                             for (var ii = 0; ii < len; ii++) {
                                 var previous_x = seriesData[i].data[ii].x;
                                 seriesData[i].data[ii].x = seriesData[i].data[ii].x - tmp;
                                 x_mapper[seriesData[i].data[ii].x] = previous_x;
-                            }
+                            }*/
                             if(YLog != undefined) {
                                 for (var ii = 0; ii < len; ii++) {
                                     var previous_y = seriesData[i].data[ii].y;
@@ -268,26 +270,21 @@
         });
 
         /*
-         * get hostnames to fill the drop-down menu
+         * firstly, get annotations
+         * then, get data 
          */
-        /*var Response, original_request;
+        var original_request;
         $.ajax({
             type: 'GET',
-            url: "/runtime/" + user + '/' + task + '/' + executionID,
+            url: "/annotators/" + user + '/' + executionID,
             success: function(response) {
-                Response = response;
-                original_request = '/' + user + '/' + task + '/' + executionID + '?hostname=' + 'All Hosts';
+                annotators = response;
+                original_request = '/' + user + '/' + executionID + '?hostname=' + 'All Hosts';
             },
             complete: function() {
                 data_request(original_request, 1);
-                $(HostNames).each(function(i) {
-                    $('<option value="' + HostNames[i] + '">' + HostNames[i] + '</option>').appendTo('#hostnamesFilter');
-                    $("#hostnamesFilter").show();
-                });
             }
-        });*/
-        original_request = '/' + user + '/' + executionID + '?hostname=' + 'All Hosts';
-        data_request(original_request, 1);
+        });
     });
 
     function new_query(callback) {
@@ -334,6 +331,9 @@
         var hoverDetail = new Rickshaw.Graph.HoverDetail({
             graph: graph,
             xFormatter: function(x) {
+                return new Date(x * 1000).toString();
+            }
+            /*xFormatter: function(x) {
                 var detail = x_mapper[x];
                 return new Date(detail * 1000).toString();
             },
@@ -346,8 +346,19 @@
                     detail = y;
                 }
                 return detail;
-            }
+            }*/
         });
+
+        var annotator = new Rickshaw.Graph.Annotate({
+            graph: graph,
+            element: document.getElementById('timeline')
+        });
+
+        for (var i = annotators.length - 1; i >= 0; i--) {
+            annotator.add(annotators[i].timestamp, annotators[i].message);
+            annotator.update();
+        }
+
 
         var legend = new Rickshaw.Graph.Legend({
             graph: graph,
@@ -381,6 +392,8 @@
             orientation: 'bottom',
             tickFormat: Rickshaw.Fixtures.Number.formatSeconds,
             element: document.getElementById('x_axis'),
+            tickRotation: 20,
+            tickOffsetX: 75
         });
 
         var yAxis = new Rickshaw.Graph.Axis.Y({

@@ -147,8 +147,7 @@ router.get('/:workflowID/:experimentID', function(req, res, next) {
                         ranges_end = ranges[task].end;
                     }
                 });
-                console.log(ranges_begin);
-                console.log(ranges_end);
+                var begin_string = ranges_begin.toString().split(".");
 
                 /* get the size of the experiment*/
                 var max_size = 0;
@@ -160,7 +159,7 @@ router.get('/:workflowID/:experimentID', function(req, res, next) {
                                 filter: {
                                     range: {
                                         "@timestamp": {
-                                            "gte": ranges_begin.toString(),
+                                            "gte": begin_string[0],
                                             "lte": ranges_end.toString()
                                         }
                                     }
@@ -176,7 +175,6 @@ router.get('/:workflowID/:experimentID', function(req, res, next) {
                     }
                     if (response.hits !== undefined) {
                         max_size = response.hits.total;
-                        console.log(max_size);
 
                         /*energy query*/
                         client.search({
@@ -187,7 +185,7 @@ router.get('/:workflowID/:experimentID', function(req, res, next) {
                                         filter: {
                                             range: {
                                                 "@timestamp": {
-                                                    "gte": ranges_begin.toString(),
+                                                    "gte": begin_string[0],
                                                     "lte": ranges_end.toString()
                                                 }
                                             }
@@ -290,6 +288,113 @@ router.get('/:workflowID/:experimentID', function(req, res, next) {
                         });
                     }
                 });
+            });
+        }
+    });
+});
+
+router.get('/annotators/:workflowID/:experimentID', function (req, res, next) {
+    var client = req.app.get('elastic'),
+      mf_server = req.app.get('mf_server'),
+      workflow = req.params.workflowID.toLowerCase(),
+      experiment = req.params.experimentID,
+      dreamcloud_pwm_idx = 'power_dreamcloud';
+
+    var annotators = [];
+
+    client.get({
+        index: 'mf',
+        type: 'workflows',
+        id: workflow
+    }, function (error, result) {
+        if (error) {
+            var message = {};
+            message.error = 'Given workflow ID does not exist.';
+            res.status(404);
+            return next(message);
+        }
+        if (result !== undefined) {
+            
+            var tasks = result._source.tasks;
+
+            /* FOR EACH TASK */
+            async.each(tasks, function(task, callback) {
+                task = task.name;
+                var resource = workflow + "_" + task;
+                resource = resource.toLowerCase();
+
+                async.series([
+                    /* GET START DATE OF TASK */
+                    function(series_callback) {
+                        client.search({
+                            index: resource,
+                            type: experiment,
+                            size: 1,
+                            sort: [ "@timestamp:asc" ],
+                        }, function(error, result) {
+                            if (error) {
+                                return series_callback(error);
+                            }
+                            if (result.hits !== undefined) {
+                                var only_results = result.hits.hits,
+                                    keys = Object.keys(only_results),
+                                    start = 0;
+                                keys.forEach(function(key) {
+                                    var metric_data = only_results[key]._source;
+                                    start = moment(metric_data['@timestamp']).unix();
+                                });
+                                if(start !== 0) {
+                                    annotators.push({
+                                        timestamp: start,
+                                        message: task + ' start'
+                                    });
+                                }
+                                series_callback(null);
+                            }
+                        });
+                    },
+                    /* GET END DATE OF TASK */
+                    function(series_callback) {
+                        client.search({
+                            index: resource,
+                            type: experiment,
+                            size: 1,
+                            sort: [ "@timestamp:desc" ],
+                        }, function(error, result) {
+                            if (error) {
+                                return series_callback(error);
+                            }
+                            if (result.hits !== undefined) {
+                                var only_results = result.hits.hits,
+                                    keys = Object.keys(only_results),
+                                    end = 0;
+                                keys.forEach(function(key) {
+                                    var metric_data = only_results[key]._source;
+                                    end = moment(metric_data['@timestamp']).unix();
+                                });
+                                if (end !== 0) {
+                                    annotators.push({
+                                        timestamp: end,
+                                        message: task + ' end'
+                                    });
+
+                                }
+                                series_callback(null);
+                            }
+                        });
+                    }
+                ], function(error) {
+                    if (error) {
+                        return callback();
+                    }
+                    callback(null);
+                });
+            }, function(error) {
+                if (error) {
+                    res.status(500);
+                    return next(error);
+                }
+                res.send(annotators);
             });
         }
     });
