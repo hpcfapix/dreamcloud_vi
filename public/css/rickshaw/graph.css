@@ -49,10 +49,10 @@
 }
 .rickshaw_annotation_timeline .annotation {
 	position: absolute;
-	height: 334px;
+	height: 369px;
 	width: 3px;
 	margin-left: 0px;
-	top: -346px;
+	top: -378px;
 	border-radius: 5px;
 	background-color: rgba(0, 0, 0, 0.25);
 }

@@ -35,7 +35,7 @@ router.get('/:workflowID/:experimentID', function(req, res, next) {
       workflow = req.params.workflowID.toLowerCase(),
       experiment = req.params.experimentID,
       dreamcloud_pwm_idx = 'power_dreamcloud',
-      metrics = req.query.metrics,
+      metrics = ['NODE01', 'NODE02', 'NODE03'],
       live = req.query.live;
 
     var global = [];
@@ -129,7 +129,7 @@ router.get('/:workflowID/:experimentID', function(req, res, next) {
 
                 /* get the beginning date, end data of the experiment*/
                 var keys = Object.keys(ranges);
-                var very_begin = new Date();
+                var very_begin = new Date("2200-01-01T00:00:00.000");
                 very_begin = very_begin.getTime();
                 var very_end = 0;
                 var ranges_begin, ranges_end;
