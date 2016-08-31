@@ -253,7 +253,7 @@
         });
 
         for (var i = annotators.length - 1; i >= 0; i--) {
-            annotator.add(annotators[i].timestamp, annotators[i].message);
+            annotator.add(annotators[i].start, annotators[i].message, annotators[i].end, palette.color());
             annotator.update();
         }
 

@@ -322,7 +322,9 @@ router.get('/annotators/:workflowID/:experimentID', function (req, res, next) {
                 task = task.name;
                 var resource = workflow + "_" + task;
                 resource = resource.toLowerCase();
-
+                var start=0, 
+                    end = 0, 
+                    message = '';
                 async.series([
                     /* GET START DATE OF TASK */
                     function(series_callback) {
@@ -337,18 +339,12 @@ router.get('/annotators/:workflowID/:experimentID', function (req, res, next) {
                             }
                             if (result.hits !== undefined) {
                                 var only_results = result.hits.hits,
-                                    keys = Object.keys(only_results),
-                                    start = 0;
+                                    keys = Object.keys(only_results);
                                 keys.forEach(function(key) {
                                     var metric_data = only_results[key]._source;
                                     start = moment(metric_data['@timestamp']).unix();
+
                                 });
-                                if(start !== 0) {
-                                    annotators.push({
-                                        timestamp: start,
-                                        message: task + ' start'
-                                    });
-                                }
                                 series_callback(null);
                             }
                         });
@@ -366,22 +362,25 @@ router.get('/annotators/:workflowID/:experimentID', function (req, res, next) {
                             }
                             if (result.hits !== undefined) {
                                 var only_results = result.hits.hits,
-                                    keys = Object.keys(only_results),
-                                    end = 0;
+                                    keys = Object.keys(only_results);
                                 keys.forEach(function(key) {
                                     var metric_data = only_results[key]._source;
                                     end = moment(metric_data['@timestamp']).unix();
                                 });
-                                if (end !== 0) {
-                                    annotators.push({
-                                        timestamp: end,
-                                        message: task + ' end'
-                                    });
-
-                                }
                                 series_callback(null);
                             }
                         });
+                    },
+                    /* push the start and end time to annotators*/
+                    function(series_callback) {
+                        if((start !== 0) && (end !== 0)) {
+                            annotators.push({
+                                start: start,
+                                end: end,
+                                message: task
+                            });
+                        }
+                        series_callback(null);
                     }
                 ], function(error) {
                     if (error) {

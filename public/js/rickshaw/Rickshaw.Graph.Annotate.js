@@ -11,9 +11,9 @@ Rickshaw.Graph.Annotate = function(args) {
 
 	this.elements.timeline.classList.add('rickshaw_annotation_timeline');
 
-	this.add = function(time, content, end_time) {
+	this.add = function(time, content, end_time, color) {
 		self.data[time] = self.data[time] || {'boxes': []};
-		self.data[time].boxes.push({content: content, end: end_time});
+		self.data[time].boxes.push({content: content, end: end_time, color: color});
 	};
 
 	this.update = function() {
@@ -62,6 +62,7 @@ Rickshaw.Graph.Annotate = function(args) {
 					element = box.element = document.createElement('div');
 					element.classList.add('content');
 					element.innerHTML = box.content;
+					annotation.element.style.backgroundColor = box.color;
 					annotation.element.appendChild(element);
 
 					annotation.line = document.createElement('div');
